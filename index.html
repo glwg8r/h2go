@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coral Reef - Water Structure Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #001122, #003355, #001a33);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: radial-gradient(circle at center, rgba(0,50,100,0.3), rgba(0,20,40,0.8));
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(0,30,60,0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(100,200,255,0.3);
+            box-shadow: 0 8px 32px rgba(0,100,200,0.2);
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #66ccff;
+        }
+
+        input[type="text"], select {
+            width: 200px;
+            padding: 8px;
+            background: rgba(0,50,100,0.5);
+            border: 1px solid rgba(100,200,255,0.3);
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+        }
+
+        input[type="color"] {
+            width: 50px;
+            height: 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="range"] {
+            width: 200px;
+        }
+
+        button {
+            background: linear-gradient(45deg, #0066cc, #0099ff);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #0080ff, #00aaff);
+            transform: translateY(-2px);
+        }
+
+        .main-title {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-align: right;
+            z-index: 100;
+        }
+
+        .main-title h1 {
+            font-size: 48px;
+            background: linear-gradient(45deg, #66ccff, #99ddff, #ccf0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+            text-shadow: 0 0 20px rgba(102,204,255,0.5);
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+
+        .main-title p {
+            font-size: 16px;
+            color: #99ccff;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+
+        .brand-corner {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            text-align: center;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .brand-logo {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 10px rgba(138,43,226,0.4));
+        }
+
+        .brand-corner .brand-name {
+            font-size: 14px;
+            background: linear-gradient(45deg, #8a2be2, #da70d6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+
+        .brand-corner .brand-subtitle {
+            font-size: 8px;
+            color: #cc99ff;
+            opacity: 0.7;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .sound-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .frequency-display {
+            font-size: 11px;
+            color: #88ccff;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <canvas id="canvas"></canvas>
+        
+        <div class="main-title">
+            <h1>CORAL REEF</h1>
+            <p>Water Structure Visualizer</p>
+        </div>
+
+        <div class="brand-corner">
+            <svg class="brand-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Outer glow effect -->
+                <defs>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge> 
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                    <filter id="uvGlow">
+                        <feGaussianBlur stdDeviation="4" result="uvBlur"/>
+                        <feFlood flood-color="#8a2be2" flood-opacity="0.8"/>
+                        <feComposite in2="uvBlur" operator="in"/>
+                        <feMerge> 
+                            <feMergeNode/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                    <linearGradient id="dropGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#4da6ff;stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:#0080ff;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#003d7a;stop-opacity:1" />
+                    </linearGradient>
+                    <linearGradient id="purpleFlame" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#da70d6;stop-opacity:0.9" />
+                        <stop offset="30%" style="stop-color:#9932cc;stop-opacity:0.8" />
+                        <stop offset="70%" style="stop-color:#6a0dad;stop-opacity:0.7" />
+                        <stop offset="100%" style="stop-color:#4b0082;stop-opacity:0.6" />
+                    </linearGradient>
+                    <linearGradient id="flameHighlight" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.4" />
+                        <stop offset="50%" style="stop-color:#e6ccff;stop-opacity:0.3" />
+                        <stop offset="100%" style="stop-color:#cc99ff;stop-opacity:0.2" />
+                    </linearGradient>
+                </defs>
+                
+                <!-- Main water drop shape with UV glow -->
+                <path d="M100 30 C130 30, 160 60, 160 100 C160 140, 130 170, 100 170 C70 170, 40 140, 40 100 C40 60, 70 30, 100 30 Z" 
+                      fill="url(#dropGradient)" 
+                      stroke="#8a2be2" 
+                      stroke-width="3" 
+                      filter="url(#uvGlow)"/>
+                
+                <!-- Purple flame shape -->
+                <path d="M100 60 C115 60, 130 75, 130 95 C130 115, 115 130, 100 130 C85 130, 70 115, 70 95 C70 75, 85 60, 100 60 Z" 
+                      fill="url(#purpleFlame)"/>
+                
+                <!-- Flame flicker effect -->
+                <path d="M95 65 C100 62, 105 65, 110 70 C115 75, 112 85, 107 90 C105 95, 100 100, 95 95 C90 90, 88 80, 92 75 C94 70, 95 65, 95 65 Z" 
+                      fill="url(#flameHighlight)">
+                      <animateTransform
+                        attributeName="transform"
+                        attributeType="XML"
+                        type="scale"
+                        values="1 1;1.1 0.9;1 1;0.9 1.1;1 1"
+                        dur="2s"
+                        repeatCount="indefinite"/>
+                </path>
+                
+                <!-- Inner flame highlight -->
+                <path d="M100 70 C108 70, 115 77, 115 87 C115 97, 108 104, 100 104 C92 104, 85 97, 85 87 C85 77, 92 70, 100 70 Z" 
+                      fill="rgba(255,255,255,0.3)"/>
+            </svg>
+            
+            <div class="brand-name">AQUA IGNIS</div>
+            <div class="brand-subtitle">Powered By</div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Intent Word</label>
+                <input type="text" id="wordInput" placeholder="Enter a word..." value="harmony">
+                <button onclick="updateWord()">Apply</button>
+            </div>
+
+            <div class="control-group">
+                <label>Crystal Color</label>
+                <input type="color" id="colorInput" value="#66ccff">
+            </div>
+
+            <div class="control-group">
+                <label>Formation Shape</label>
+                <select id="shapeInput">
+                    <option value="hexagon">Hexagon</option>
+                    <option value="triangle">Triangle</option>
+                    <option value="circle">Circle</option>
+                    <option value="square">Square</option>
+                    <option value="star">Star</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Frequency (Hz)</label>
+                <div class="sound-controls">
+                    <input type="range" id="frequencySlider" min="20" max="1000" value="432">
+                    <button onclick="toggleSound()">🔊</button>
+                </div>
+                <div class="frequency-display" id="frequencyDisplay">432 Hz</div>
+            </div>
+
+            <div class="control-group">
+                <label>Flow Intensity</label>
+                <input type="range" id="intensitySlider" min="1" max="10" value="5">
+            </div>
+
+            <button onclick="resetVisualization()">Reset Matrix</button>
+        </div>
+    </div>
+
+    <script>
+        class Particle {
+            constructor(x, y, color, shape) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.size = Math.random() * 6 + 2;
+                this.color = color;
+                this.shape = shape;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.02 + 0.005;
+                this.frequency = 432;
+                this.phase = Math.random() * Math.PI * 2;
+            }
+
+            update(mouseX, mouseY, frequency, intensity, word) {
+                // Frequency influence on movement
+                const freqInfluence = frequency / 1000;
+                this.vx += Math.sin(Date.now() * 0.01 + this.phase) * freqInfluence * 0.1;
+                this.vy += Math.cos(Date.now() * 0.01 + this.phase) * freqInfluence * 0.1;
+
+                // Word influence (positive words create more organized patterns)
+                const positiveWords = ['love', 'peace', 'harmony', 'joy', 'light', 'healing', 'gratitude', 'beauty'];
+                const isPositive = positiveWords.some(w => word.toLowerCase().includes(w));
+                
+                if (isPositive) {
+                    // Create more structured movement
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height / 2;
+                    const dx = centerX - this.x;
+                    const dy = centerY - this.y;
+                    this.vx += dx * 0.0001;
+                    this.vy += dy * 0.0001;
+                }
+
+                // Mouse attraction
+                const dx = mouseX - this.x;
+                const dy = mouseY - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 150) {
+                    const force = (150 - distance) / 150;
+                    this.vx += (dx / distance) * force * 0.5;
+                    this.vy += (dy / distance) * force * 0.5;
+                }
+
+                // Apply intensity
+                this.vx *= (intensity / 10);
+                this.vy *= (intensity / 10);
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Boundary wrapping
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+
+                // Apply damping
+                this.vx *= 0.98;
+                this.vy *= 0.98;
+
+                this.life -= this.decay;
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.life * 0.7;
+                ctx.fillStyle = this.color;
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 1;
+
+                ctx.translate(this.x, this.y);
+
+                switch(this.shape) {
+                    case 'hexagon':
+                        this.drawHexagon(ctx);
+                        break;
+                    case 'triangle':
+                        this.drawTriangle(ctx);
+                        break;
+                    case 'circle':
+                        this.drawCircle(ctx);
+                        break;
+                    case 'square':
+                        this.drawSquare(ctx);
+                        break;
+                    case 'star':
+                        this.drawStar(ctx);
+                        break;
+                }
+
+                ctx.restore();
+            }
+
+            drawHexagon(ctx) {
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i * Math.PI) / 3;
+                    const x = Math.cos(angle) * this.size;
+                    const y = Math.sin(angle) * this.size;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+            drawTriangle(ctx) {
+                ctx.beginPath();
+                ctx.moveTo(0, -this.size);
+                ctx.lineTo(-this.size, this.size);
+                ctx.lineTo(this.size, this.size);
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+            drawCircle(ctx) {
+                ctx.beginPath();
+                ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            drawSquare(ctx) {
+                ctx.strokeRect(-this.size/2, -this.size/2, this.size, this.size);
+            }
+
+            drawStar(ctx) {
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
+                    const x = Math.cos(angle) * this.size;
+                    const y = Math.sin(angle) * this.size;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                    
+                    const innerAngle = angle + Math.PI / 5;
+                    const innerX = Math.cos(innerAngle) * this.size * 0.5;
+                    const innerY = Math.sin(innerAngle) * this.size * 0.5;
+                    ctx.lineTo(innerX, innerY);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+        }
+
+        // Setup
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouseX = 0;
+        let mouseY = 0;
+        let audioContext;
+        let oscillator;
+        let isPlaying = false;
+        let currentWord = 'harmony';
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function createParticles() {
+            particles = [];
+            const particleCount = 150;
+            const color = document.getElementById('colorInput').value;
+            const shape = document.getElementById('shapeInput').value;
+            
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle(
+                    Math.random() * canvas.width,
+                    Math.random() * canvas.height,
+                    color,
+                    shape
+                ));
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 20, 40, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const frequency = parseInt(document.getElementById('frequencySlider').value);
+            const intensity = parseInt(document.getElementById('intensitySlider').value);
+
+            // Update and draw particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const particle = particles[i];
+                particle.update(mouseX, mouseY, frequency, intensity, currentWord);
+                
+                if (particle.life <= 0) {
+                    particles.splice(i, 1);
+                    // Spawn new particle
+                    const color = document.getElementById('colorInput').value;
+                    const shape = document.getElementById('shapeInput').value;
+                    particles.push(new Particle(
+                        Math.random() * canvas.width,
+                        Math.random() * canvas.height,
+                        color,
+                        shape
+                    ));
+                } else {
+                    particle.draw(ctx);
+                }
+            }
+
+            // Draw connections between nearby particles
+            ctx.strokeStyle = document.getElementById('colorInput').value + '20';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 80) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.globalAlpha = (80 - distance) / 80 * 0.3;
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
+                    }
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function updateWord() {
+            currentWord = document.getElementById('wordInput').value;
+        }
+
+        function toggleSound() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (isPlaying) {
+                oscillator.stop();
+                isPlaying = false;
+            } else {
+                oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(
+                    document.getElementById('frequencySlider').value, 
+                    audioContext.currentTime
+                );
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                
+                oscillator.start();
+                isPlaying = true;
+                
+                oscillator.onended = () => {
+                    isPlaying = false;
+                };
+            }
+        }
+
+        function resetVisualization() {
+            createParticles();
+        }
+
+        // Event listeners
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        document.getElementById('colorInput').addEventListener('change', createParticles);
+        document.getElementById('shapeInput').addEventListener('change', createParticles);
+
+        document.getElementById('frequencySlider').addEventListener('input', (e) => {
+            document.getElementById('frequencyDisplay').textContent = e.target.value + ' Hz';
+            if (isPlaying && oscillator) {
+                oscillator.frequency.setValueAtTime(e.target.value, audioContext.currentTime);
+            }
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // Initialize
+        resizeCanvas();
+        createParticles();
+        animate();
+    </script>
+</body>
+</html>
