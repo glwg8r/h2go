@@ -36,12 +36,15 @@
             top: 20px;
             left: 20px;
             z-index: 100;
-            background: rgba(0,30,60,0.8);
-            backdrop-filter: blur(10px);
+            background: rgba(0,30,60,0.9);
+            backdrop-filter: blur(15px);
             border-radius: 15px;
             padding: 20px;
             border: 1px solid rgba(100,200,255,0.3);
             box-shadow: 0 8px 32px rgba(0,100,200,0.2);
+            max-width: 350px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .control-group {
@@ -254,14 +257,25 @@
 
         <div class="controls">
             <div class="control-group">
-                <label>Intent Word</label>
-                <input type="text" id="wordInput" placeholder="Enter a word..." value="harmony">
-                <button onclick="updateWord()">Apply</button>
-            </div>
-
-            <div class="control-group">
-                <label>Crystal Color</label>
-                <input type="color" id="colorInput" value="#66ccff">
+                <label>Color Palette</label>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <label style="font-size: 9px; margin-bottom: 3px;">Primary</label>
+                        <input type="color" id="colorInput1" value="#66ccff">
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <label style="font-size: 9px; margin-bottom: 3px;">Secondary</label>
+                        <input type="color" id="colorInput2" value="#ff6699">
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <label style="font-size: 9px; margin-bottom: 3px;">Accent</label>
+                        <input type="color" id="colorInput3" value="#99ff66">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button onclick="randomizeColors()" style="flex: 1; font-size: 10px; padding: 5px;">Random</button>
+                    <button onclick="harmonicColors()" style="flex: 1; font-size: 10px; padding: 5px;">Harmonic</button>
+                </div>
             </div>
 
             <div class="control-group">
@@ -276,12 +290,253 @@
             </div>
 
             <div class="control-group">
-                <label>Frequency (Hz)</label>
-                <div class="sound-controls">
-                    <input type="range" id="frequencySlider" min="20" max="1000" value="432">
-                    <button onclick="toggleSound()">🔊</button>
+                <label>🌊 Multi-Wave Synthesizer</label>
+                <div style="background: rgba(100,200,255,0.1); padding: 15px; border-radius: 10px; margin-top: 10px;">
+                    <div class="master-controls">
+                        <label style="font-size: 11px; margin-bottom: 5px;">Master Controls</label>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button id="playAll" style="flex: 1;">Play All</button>
+                            <button id="stopAll" style="flex: 1;">Stop All</button>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-size: 10px;">Master Volume</label>
+                            <input type="range" id="masterVolume" min="0" max="100" value="30" style="width: 100%;">
+                            <div class="frequency-display">30%</div>
+                        </div>
+                        
+                        <!-- Preset Frequencies -->
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-size: 10px; margin-bottom: 5px;">Healing Frequency Presets</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                <button onclick="loadPreset('solfeggio')" style="font-size: 9px; padding: 4px 8px;">Solfeggio</button>
+                                <button onclick="loadPreset('schumann')" style="font-size: 9px; padding: 4px 8px;">Schumann</button>
+                                <button onclick="loadPreset('planetary')" style="font-size: 9px; padding: 4px 8px;">Planetary</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Frequency Spectrum Display -->
+                        <div style="margin-bottom: 10px;">
+                            <label style="font-size: 10px; margin-bottom: 5px;">Active Frequencies</label>
+                            <canvas id="spectrumCanvas" width="280" height="120" style="width: 100%; height: 80px; background: rgba(0,20,40,0.5); border-radius: 5px;"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Wave Generator 1 -->
+                    <div class="wave-generator" style="background: rgba(0,50,100,0.3); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <input type="checkbox" id="wave1Enable" style="margin-right: 8px;">
+                            <label style="font-size: 11px; font-weight: bold; color: #66ccff;">Wave 1</label>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Frequency (Hz)</label>
+                                <input type="number" id="wave1Freq" min="0" max="20000" value="432" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Wave Type</label>
+                                <select id="wave1Type" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                                    <option value="sine">Sine</option>
+                                    <option value="square">Square</option>
+                                    <option value="triangle">Triangle</option>
+                                    <option value="sawtooth">Sawtooth</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 9px;">Volume</label>
+                            <input type="range" id="wave1Volume" min="0" max="100" value="50" style="width: 100%;">
+                        </div>
+                    </div>
+
+                    <!-- Wave Generator 2 -->
+                    <div class="wave-generator" style="background: rgba(0,50,100,0.3); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <input type="checkbox" id="wave2Enable" style="margin-right: 8px;">
+                            <label style="font-size: 11px; font-weight: bold; color: #66ccff;">Wave 2</label>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Frequency (Hz)</label>
+                                <input type="number" id="wave2Freq" min="0" max="20000" value="528" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Wave Type</label>
+                                <select id="wave2Type" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                                    <option value="sine">Sine</option>
+                                    <option value="square">Square</option>
+                                    <option value="triangle">Triangle</option>
+                                    <option value="sawtooth">Sawtooth</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 9px;">Volume</label>
+                            <input type="range" id="wave2Volume" min="0" max="100" value="50" style="width: 100%;">
+                        </div>
+                    </div>
+
+                    <!-- Wave Generator 3 -->
+                    <div class="wave-generator" style="background: rgba(0,50,100,0.3); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <input type="checkbox" id="wave3Enable" style="margin-right: 8px;">
+                            <label style="font-size: 11px; font-weight: bold; color: #66ccff;">Wave 3</label>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Frequency (Hz)</label>
+                                <input type="number" id="wave3Freq" min="0" max="20000" value="639" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Wave Type</label>
+                                <select id="wave3Type" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                                    <option value="sine">Sine</option>
+                                    <option value="square">Square</option>
+                                    <option value="triangle">Triangle</option>
+                                    <option value="sawtooth">Sawtooth</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 9px;">Volume</label>
+                            <input type="range" id="wave3Volume" min="0" max="100" value="50" style="width: 100%;">
+                        </div>
+                    </div>
+
+                    <!-- Wave Generator 4 -->
+                    <div class="wave-generator" style="background: rgba(0,50,100,0.3); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <input type="checkbox" id="wave4Enable" style="margin-right: 8px;">
+                            <label style="font-size: 11px; font-weight: bold; color: #66ccff;">Wave 4</label>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Frequency (Hz)</label>
+                                <input type="number" id="wave4Freq" min="0" max="20000" value="741" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Wave Type</label>
+                                <select id="wave4Type" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                                    <option value="sine">Sine</option>
+                                    <option value="square">Square</option>
+                                    <option value="triangle">Triangle</option>
+                                    <option value="sawtooth">Sawtooth</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 9px;">Volume</label>
+                            <input type="range" id="wave4Volume" min="0" max="100" value="50" style="width: 100%;">
+                        </div>
+                    </div>
+
+                    <!-- Wave Generator 5 -->
+                    <div class="wave-generator" style="background: rgba(0,50,100,0.3); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <input type="checkbox" id="wave5Enable" style="margin-right: 8px;">
+                            <label style="font-size: 11px; font-weight: bold; color: #66ccff;">Wave 5</label>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Frequency (Hz)</label>
+                                <input type="number" id="wave5Freq" min="0" max="20000" value="741" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Wave Type</label>
+                                <select id="wave5Type" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                                    <option value="sine">Sine</option>
+                                    <option value="square">Square</option>
+                                    <option value="triangle">Triangle</option>
+                                    <option value="sawtooth">Sawtooth</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 9px;">Volume</label>
+                            <input type="range" id="wave5Volume" min="0" max="100" value="50" style="width: 100%;">
+                        </div>
+                    </div>
+
+                    <!-- Wave Generator 6 -->
+                    <div class="wave-generator" style="background: rgba(0,50,100,0.3); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <input type="checkbox" id="wave6Enable" style="margin-right: 8px;">
+                            <label style="font-size: 11px; font-weight: bold; color: #66ccff;">Wave 6</label>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Frequency (Hz)</label>
+                                <input type="number" id="wave6Freq" min="0" max="20000" value="852" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Wave Type</label>
+                                <select id="wave6Type" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                                    <option value="sine">Sine</option>
+                                    <option value="square">Square</option>
+                                    <option value="triangle">Triangle</option>
+                                    <option value="sawtooth">Sawtooth</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 9px;">Volume</label>
+                            <input type="range" id="wave6Volume" min="0" max="100" value="50" style="width: 100%;">
+                        </div>
+                    </div>
+
+                    <!-- Wave Generator 7 -->
+                    <div class="wave-generator" style="background: rgba(0,50,100,0.3); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <input type="checkbox" id="wave7Enable" style="margin-right: 8px;">
+                            <label style="font-size: 11px; font-weight: bold; color: #66ccff;">Wave 7</label>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Frequency (Hz)</label>
+                                <input type="number" id="wave7Freq" min="0" max="20000" value="852" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Wave Type</label>
+                                <select id="wave7Type" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                                    <option value="sine">Sine</option>
+                                    <option value="square">Square</option>
+                                    <option value="triangle">Triangle</option>
+                                    <option value="sawtooth">Sawtooth</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 9px;">Volume</label>
+                            <input type="range" id="wave7Volume" min="0" max="100" value="50" style="width: 100%;">
+                        </div>
+                    </div>
+
+                    <!-- Wave Generator 8 -->
+                    <div class="wave-generator" style="background: rgba(0,50,100,0.3); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <input type="checkbox" id="wave8Enable" style="margin-right: 8px;">
+                            <label style="font-size: 11px; font-weight: bold; color: #66ccff;">Wave 8</label>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Frequency (Hz)</label>
+                                <input type="number" id="wave8Freq" min="0" max="20000" value="963" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 9px;">Wave Type</label>
+                                <select id="wave8Type" style="width: 100%; padding: 4px; background: rgba(0,30,60,0.5); border: 1px solid rgba(100,200,255,0.3); border-radius: 4px; color: white; font-size: 12px;">
+                                    <option value="sine">Sine</option>
+                                    <option value="square">Square</option>
+                                    <option value="triangle">Triangle</option>
+                                    <option value="sawtooth">Sawtooth</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 9px;">Volume</label>
+                            <input type="range" id="wave8Volume" min="0" max="100" value="50" style="width: 100%;">
+                        </div>
+                    </div>
                 </div>
-                <div class="frequency-display" id="frequencyDisplay">432 Hz</div>
             </div>
 
             <div class="control-group">
@@ -294,55 +549,262 @@
     </div>
 
     <script>
-        class Particle {
-            constructor(x, y, color, shape) {
-                this.x = x;
-                this.y = y;
-                this.vx = (Math.random() - 0.5) * 2;
-                this.vy = (Math.random() - 0.5) * 2;
-                this.size = Math.random() * 6 + 2;
-                this.color = color;
-                this.shape = shape;
-                this.life = 1.0;
-                this.decay = Math.random() * 0.02 + 0.005;
-                this.frequency = 432;
-                this.phase = Math.random() * Math.PI * 2;
+        class MultiWaveSynth {
+            constructor() {
+                this.audioContext = null;
+                this.masterGain = null;
+                this.oscillators = {};
+                this.gainNodes = {};
+                this.analyser = null;
+                this.isPlaying = false;
+                this.waveData = new Uint8Array(256);
             }
 
-            update(mouseX, mouseY, frequency, intensity, word) {
-                // Frequency influence on movement
-                const freqInfluence = frequency / 1000;
-                this.vx += Math.sin(Date.now() * 0.01 + this.phase) * freqInfluence * 0.1;
-                this.vy += Math.cos(Date.now() * 0.01 + this.phase) * freqInfluence * 0.1;
+            async initialize() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.masterGain = this.audioContext.createGain();
+                    this.analyser = this.audioContext.createAnalyser();
+                    this.analyser.fftSize = 512;
+                    
+                    this.masterGain.connect(this.analyser);
+                    this.analyser.connect(this.audioContext.destination);
+                    
+                    // Set initial master volume
+                    this.masterGain.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                } catch (error) {
+                    console.error('Failed to initialize audio context:', error);
+                }
+            }
 
-                // Word influence (positive words create more organized patterns)
-                const positiveWords = ['love', 'peace', 'harmony', 'joy', 'light', 'healing', 'gratitude', 'beauty'];
-                const isPositive = positiveWords.some(w => word.toLowerCase().includes(w));
-                
-                if (isPositive) {
-                    // Create more structured movement
-                    const centerX = canvas.width / 2;
-                    const centerY = canvas.height / 2;
-                    const dx = centerX - this.x;
-                    const dy = centerY - this.y;
-                    this.vx += dx * 0.0001;
-                    this.vy += dy * 0.0001;
+            startWave(waveNum) {
+                if (!this.audioContext) return;
+
+                const freq = parseInt(document.getElementById(`wave${waveNum}Freq`).value) || 0;
+                const type = document.getElementById(`wave${waveNum}Type`).value;
+                const volume = parseInt(document.getElementById(`wave${waveNum}Volume`).value) / 100;
+
+                // Stop existing oscillator if running
+                this.stopWave(waveNum);
+
+                if (freq > 0) {
+                    // Create oscillator and gain node
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+
+                    oscillator.type = type;
+                    oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(volume * 0.2, this.audioContext.currentTime); // Scale down for safety
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.masterGain);
+
+                    oscillator.start();
+
+                    // Store references
+                    this.oscillators[waveNum] = oscillator;
+                    this.gainNodes[waveNum] = gainNode;
+                }
+            }
+
+            stopWave(waveNum) {
+                if (this.oscillators[waveNum]) {
+                    try {
+                        this.oscillators[waveNum].stop();
+                    } catch (e) {
+                        // Oscillator might already be stopped
+                    }
+                    delete this.oscillators[waveNum];
+                    delete this.gainNodes[waveNum];
+                }
+            }
+
+            updateWave(waveNum) {
+                if (!this.audioContext || !this.oscillators[waveNum]) return;
+
+                const freq = parseInt(document.getElementById(`wave${waveNum}Freq`).value) || 0;
+                const volume = parseInt(document.getElementById(`wave${waveNum}Volume`).value) / 100;
+
+                if (freq > 0) {
+                    this.oscillators[waveNum].frequency.setValueAtTime(freq, this.audioContext.currentTime);
+                    this.gainNodes[waveNum].gain.setValueAtTime(volume * 0.2, this.audioContext.currentTime);
+                }
+            }
+
+            setMasterVolume(volume) {
+                if (this.masterGain) {
+                    this.masterGain.gain.setValueAtTime(volume, this.audioContext.currentTime);
+                }
+            }
+
+            playAll() {
+                if (!this.audioContext) {
+                    this.initialize().then(() => this.playAll());
+                    return;
                 }
 
-                // Mouse attraction
+                for (let i = 1; i <= 8; i++) {
+                    const enabled = document.getElementById(`wave${i}Enable`).checked;
+                    if (enabled) {
+                        this.startWave(i);
+                    }
+                }
+                this.isPlaying = true;
+            }
+
+            stopAll() {
+                for (let i = 1; i <= 8; i++) {
+                    this.stopWave(i);
+                }
+                this.isPlaying = false;
+            }
+
+            getAudioData() {
+                if (this.analyser) {
+                    this.analyser.getByteFrequencyData(this.waveData);
+                    
+                    // Calculate average amplitude
+                    let sum = 0;
+                    for (let i = 0; i < this.waveData.length; i++) {
+                        sum += this.waveData[i];
+                    }
+                    return {
+                        average: sum / this.waveData.length,
+                        waveform: this.waveData,
+                        isPlaying: this.isPlaying
+                    };
+                }
+                return { average: 0, waveform: new Uint8Array(256), isPlaying: false };
+            }
+        }
+
+        class Particle {
+            constructor(x, y, colors, shape) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 6 + 2;
+                this.originalSize = this.size;
+                this.colors = colors;
+                this.currentColorIndex = Math.floor(Math.random() * colors.length);
+                this.color = colors[this.currentColorIndex];
+                this.colorTransition = 0;
+                this.targetColorIndex = this.currentColorIndex;
+                this.shape = shape;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.01 + 0.002;
+                this.phase = Math.random() * Math.PI * 2;
+                this.resonanceFreq = Math.random() * 1000 + 100; // Each particle has a resonance frequency
+            }
+
+            update(mouseX, mouseY, audioData, intensity) {
+                // Multi-frequency audio response
+                const audioInfluence = (audioData.average / 255) * (intensity / 10);
+                
+                // Resonance effect - particles respond more to frequencies near their resonance
+                let resonanceEffect = 0;
+                let dominantFrequency = 0;
+                let maxResonance = 0;
+                
+                for (let i = 1; i <= 8; i++) {
+                    if (document.getElementById(`wave${i}Enable`).checked) {
+                        const freq = parseInt(document.getElementById(`wave${i}Freq`).value) || 0;
+                        const volume = parseInt(document.getElementById(`wave${i}Volume`).value) / 100;
+                        const resonanceDiff = Math.abs(freq - this.resonanceFreq);
+                        const resonanceStrength = Math.max(0, 1 - (resonanceDiff / 500)) * volume;
+                        resonanceEffect += resonanceStrength;
+                        
+                        // Track which frequency has the strongest influence for color changes
+                        if (resonanceStrength > maxResonance) {
+                            maxResonance = resonanceStrength;
+                            dominantFrequency = freq;
+                        }
+                    }
+                }
+                
+                // Color shifting based on frequency ranges
+                if (audioInfluence > 0.1) {
+                    if (dominantFrequency < 300) {
+                        this.targetColorIndex = 0; // Low frequencies = primary color
+                    } else if (dominantFrequency < 800) {
+                        this.targetColorIndex = 1; // Mid frequencies = secondary color
+                    } else {
+                        this.targetColorIndex = 2; // High frequencies = accent color
+                    }
+                }
+                
+                // Smooth color transitions
+                if (this.targetColorIndex !== this.currentColorIndex) {
+                    this.colorTransition += 0.05;
+                    if (this.colorTransition >= 1.0) {
+                        this.currentColorIndex = this.targetColorIndex;
+                        this.colorTransition = 0;
+                    }
+                }
+                
+                // Update current color with smooth interpolation
+                if (this.colorTransition > 0) {
+                    this.color = this.interpolateColor(
+                        this.colors[this.currentColorIndex],
+                        this.colors[this.targetColorIndex],
+                        this.colorTransition
+                    );
+                } else {
+                    this.color = this.colors[this.currentColorIndex];
+                }
+                
+                // Size responds to resonance and audio
+                this.size = this.originalSize * (1 + audioInfluence * 2 + resonanceEffect * 3);
+
+                // Multi-wave movement influence
+                let waveInfluenceX = 0;
+                let waveInfluenceY = 0;
+                
+                for (let i = 1; i <= 8; i++) {
+                    if (document.getElementById(`wave${i}Enable`).checked) {
+                        const freq = parseInt(document.getElementById(`wave${i}Freq`).value) || 0;
+                        const volume = parseInt(document.getElementById(`wave${i}Volume`).value) / 100;
+                        const waveType = document.getElementById(`wave${i}Type`).value;
+                        
+                        if (freq > 0) {
+                            const time = Date.now() * 0.001;
+                            let waveValue = 0;
+                            
+                            switch(waveType) {
+                                case 'sine':
+                                    waveValue = Math.sin(time * freq * 0.01 + this.phase);
+                                    break;
+                                case 'square':
+                                    waveValue = Math.sign(Math.sin(time * freq * 0.01 + this.phase));
+                                    break;
+                                case 'triangle':
+                                    waveValue = (2 / Math.PI) * Math.asin(Math.sin(time * freq * 0.01 + this.phase));
+                                    break;
+                                case 'sawtooth':
+                                    waveValue = 2 * ((time * freq * 0.01 + this.phase) % (2 * Math.PI)) / (2 * Math.PI) - 1;
+                                    break;
+                            }
+                            
+                            waveInfluenceX += waveValue * volume * 0.1;
+                            waveInfluenceY += Math.cos(time * freq * 0.01 + this.phase + Math.PI/2) * volume * 0.1;
+                        }
+                    }
+                }
+
+                this.vx += waveInfluenceX * 0.02;
+                this.vy += waveInfluenceY * 0.02;
+
+                // Mouse attraction enhanced by audio
                 const dx = mouseX - this.x;
                 const dy = mouseY - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance < 150) {
                     const force = (150 - distance) / 150;
-                    this.vx += (dx / distance) * force * 0.5;
-                    this.vy += (dy / distance) * force * 0.5;
+                    this.vx += (dx / distance) * force * 0.1 * (1 + audioInfluence);
+                    this.vy += (dy / distance) * force * 0.1 * (1 + audioInfluence);
                 }
-
-                // Apply intensity
-                this.vx *= (intensity / 10);
-                this.vy *= (intensity / 10);
 
                 this.x += this.vx;
                 this.y += this.vy;
@@ -353,11 +815,30 @@
                 if (this.y < 0) this.y = canvas.height;
                 if (this.y > canvas.height) this.y = 0;
 
-                // Apply damping
-                this.vx *= 0.98;
-                this.vy *= 0.98;
+                // Damping
+                this.vx *= 0.95;
+                this.vy *= 0.95;
 
                 this.life -= this.decay;
+            }
+
+            interpolateColor(color1, color2, factor) {
+                const hex1 = color1.slice(1);
+                const hex2 = color2.slice(1);
+                
+                const r1 = parseInt(hex1.substr(0, 2), 16);
+                const g1 = parseInt(hex1.substr(2, 2), 16);
+                const b1 = parseInt(hex1.substr(4, 2), 16);
+                
+                const r2 = parseInt(hex2.substr(0, 2), 16);
+                const g2 = parseInt(hex2.substr(2, 2), 16);
+                const b2 = parseInt(hex2.substr(4, 2), 16);
+                
+                const r = Math.round(r1 + (r2 - r1) * factor);
+                const g = Math.round(g1 + (g2 - g1) * factor);
+                const b = Math.round(b1 + (b2 - b1) * factor);
+                
+                return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
             }
 
             draw(ctx) {
@@ -366,6 +847,13 @@
                 ctx.fillStyle = this.color;
                 ctx.strokeStyle = this.color;
                 ctx.lineWidth = 1;
+
+                // Add resonance glow
+                const resonanceGlow = this.size > this.originalSize * 2;
+                if (resonanceGlow) {
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = this.color;
+                }
 
                 ctx.translate(this.x, this.y);
 
@@ -447,10 +935,7 @@
         let particles = [];
         let mouseX = 0;
         let mouseY = 0;
-        let audioContext;
-        let oscillator;
-        let isPlaying = false;
-        let currentWord = 'harmony';
+        let synth = new MultiWaveSynth();
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -460,14 +945,18 @@
         function createParticles() {
             particles = [];
             const particleCount = 150;
-            const color = document.getElementById('colorInput').value;
+            const colors = [
+                document.getElementById('colorInput1').value,
+                document.getElementById('colorInput2').value,
+                document.getElementById('colorInput3').value
+            ];
             const shape = document.getElementById('shapeInput').value;
             
             for (let i = 0; i < particleCount; i++) {
                 particles.push(new Particle(
                     Math.random() * canvas.width,
                     Math.random() * canvas.height,
-                    color,
+                    colors,
                     shape
                 ));
             }
@@ -477,23 +966,30 @@
             ctx.fillStyle = 'rgba(0, 20, 40, 0.1)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const frequency = parseInt(document.getElementById('frequencySlider').value);
             const intensity = parseInt(document.getElementById('intensitySlider').value);
+            const audioData = synth.getAudioData();
+
+            // Update spectrum display
+            updateSpectrum();
 
             // Update and draw particles
             for (let i = particles.length - 1; i >= 0; i--) {
                 const particle = particles[i];
-                particle.update(mouseX, mouseY, frequency, intensity, currentWord);
+                particle.update(mouseX, mouseY, audioData, intensity);
                 
                 if (particle.life <= 0) {
                     particles.splice(i, 1);
                     // Spawn new particle
-                    const color = document.getElementById('colorInput').value;
+                    const colors = [
+                        document.getElementById('colorInput1').value,
+                        document.getElementById('colorInput2').value,
+                        document.getElementById('colorInput3').value
+                    ];
                     const shape = document.getElementById('shapeInput').value;
                     particles.push(new Particle(
                         Math.random() * canvas.width,
                         Math.random() * canvas.height,
-                        color,
+                        colors,
                         shape
                     ));
                 } else {
@@ -501,20 +997,23 @@
                 }
             }
 
-            // Draw connections between nearby particles
-            ctx.strokeStyle = document.getElementById('colorInput').value + '20';
+            // Draw connections between nearby particles with dynamic colors
+            const primaryColor = document.getElementById('colorInput1').value;
+            ctx.strokeStyle = primaryColor + '20';
             ctx.lineWidth = 1;
+            const connectionDistance = 80 + (audioData.average / 255) * 40;
+            
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
                     const dx = particles[i].x - particles[j].x;
                     const dy = particles[i].y - particles[j].y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
                     
-                    if (distance < 80) {
+                    if (distance < connectionDistance) {
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.globalAlpha = (80 - distance) / 80 * 0.3;
+                        ctx.globalAlpha = (connectionDistance - distance) / connectionDistance * 0.3 * (1 + audioData.average / 255);
                         ctx.stroke();
                         ctx.globalAlpha = 1;
                     }
@@ -524,43 +1023,157 @@
             requestAnimationFrame(animate);
         }
 
-        function updateWord() {
-            currentWord = document.getElementById('wordInput').value;
-        }
-
-        function toggleSound() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-
-            if (isPlaying) {
-                oscillator.stop();
-                isPlaying = false;
-            } else {
-                oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.setValueAtTime(
-                    document.getElementById('frequencySlider').value, 
-                    audioContext.currentTime
-                );
-                oscillator.type = 'sine';
-                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                
-                oscillator.start();
-                isPlaying = true;
-                
-                oscillator.onended = () => {
-                    isPlaying = false;
-                };
+        function updateSpectrum() {
+            const spectrumCanvas = document.getElementById('spectrumCanvas');
+            const specCtx = spectrumCanvas.getContext('2d');
+            
+            // Clear spectrum canvas
+            specCtx.fillStyle = 'rgba(0, 20, 40, 0.8)';
+            specCtx.fillRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+            
+            // Draw active frequencies
+            for (let i = 1; i <= 8; i++) {
+                if (document.getElementById(`wave${i}Enable`).checked) {
+                    const freq = parseInt(document.getElementById(`wave${i}Freq`).value) || 0;
+                    const volume = parseInt(document.getElementById(`wave${i}Volume`).value) / 100;
+                    const waveType = document.getElementById(`wave${i}Type`).value;
+                    
+                    if (freq > 0) {
+                        // Map frequency to x position (logarithmic scale for better visualization)
+                        const minFreq = 1;
+                        const maxFreq = 20000;
+                        const x = (Math.log(freq) - Math.log(minFreq)) / (Math.log(maxFreq) - Math.log(minFreq)) * spectrumCanvas.width;
+                        const height = volume * spectrumCanvas.height * 0.8;
+                        
+                        // Color based on wave type
+                        const colors = {
+                            sine: '#66ccff',
+                            square: '#ff6666', 
+                            triangle: '#66ff66',
+                            sawtooth: '#ffff66'
+                        };
+                        
+                        specCtx.fillStyle = colors[waveType] || '#66ccff';
+                        specCtx.fillRect(x - 2, spectrumCanvas.height - height, 4, height);
+                        
+                        // Frequency label
+                        specCtx.fillStyle = 'white';
+                        specCtx.font = '8px Arial';
+                        specCtx.fillText(`${freq}Hz`, x - 10, spectrumCanvas.height - height - 5);
+                    }
+                }
             }
         }
 
         function resetVisualization() {
             createParticles();
+        }
+
+        function randomizeColors() {
+            // Generate random colors
+            document.getElementById('colorInput1').value = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            document.getElementById('colorInput2').value = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            document.getElementById('colorInput3').value = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            createParticles();
+        }
+
+        function harmonicColors() {
+            // Generate harmonically related colors (triadic color scheme)
+            const baseHue = Math.random() * 360;
+            const saturation = 70 + Math.random() * 30; // 70-100%
+            const lightness = 50 + Math.random() * 30;  // 50-80%
+            
+            document.getElementById('colorInput1').value = hslToHex(baseHue, saturation, lightness);
+            document.getElementById('colorInput2').value = hslToHex((baseHue + 120) % 360, saturation, lightness);
+            document.getElementById('colorInput3').value = hslToHex((baseHue + 240) % 360, saturation, lightness);
+            createParticles();
+        }
+
+        function hslToHex(h, s, l) {
+            s /= 100;
+            l /= 100;
+            
+            const c = (1 - Math.abs(2 * l - 1)) * s;
+            const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+            const m = l - c / 2;
+            let r = 0, g = 0, b = 0;
+            
+            if (0 <= h && h < 60) {
+                r = c; g = x; b = 0;
+            } else if (60 <= h && h < 120) {
+                r = x; g = c; b = 0;
+            } else if (120 <= h && h < 180) {
+                r = 0; g = c; b = x;
+            } else if (180 <= h && h < 240) {
+                r = 0; g = x; b = c;
+            } else if (240 <= h && h < 300) {
+                r = x; g = 0; b = c;
+            } else if (300 <= h && h < 360) {
+                r = c; g = 0; b = x;
+            }
+            
+            r = Math.round((r + m) * 255);
+            g = Math.round((g + m) * 255);
+            b = Math.round((b + m) * 255);
+            
+            return '#' + r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0');
+        }
+
+        // Healing frequency presets
+        function loadPreset(presetName) {
+            // Stop all waves first
+            synth.stopAll();
+            
+            // Clear all checkboxes
+            for (let i = 1; i <= 8; i++) {
+                document.getElementById(`wave${i}Enable`).checked = false;
+            }
+            
+            const presets = {
+                solfeggio: [
+                    {freq: 396, type: 'sine', volume: 60},  // Liberation from Fear
+                    {freq: 417, type: 'sine', volume: 60},  // Facilitating Change
+                    {freq: 528, type: 'sine', volume: 70},  // Love Frequency / DNA Repair
+                    {freq: 639, type: 'sine', volume: 65},  // Connection/Relationships
+                    {freq: 741, type: 'sine', volume: 55},  // Awakening Intuition
+                    {freq: 852, type: 'sine', volume: 55},  // Returning to Spiritual Order
+                    {freq: 963, type: 'sine', volume: 50},  // Pineal Gland Activation
+                    {freq: 63, type: 'sine', volume: 65}    // Deep Cellular Healing
+                ],
+                schumann: [
+                    {freq: 7.83, type: 'sine', volume: 80},   // Fundamental Earth Resonance
+                    {freq: 14.3, type: 'sine', volume: 60},   // 2nd Harmonic
+                    {freq: 20.8, type: 'sine', volume: 50},   // 3rd Harmonic
+                    {freq: 27.3, type: 'sine', volume: 45},   // 4th Harmonic
+                    {freq: 33.8, type: 'sine', volume: 40},   // 5th Harmonic
+                    {freq: 39.3, type: 'sine', volume: 35},   // 6th Harmonic
+                    {freq: 45.9, type: 'sine', volume: 30}    // 7th Harmonic
+                ],
+                planetary: [
+                    {freq: 141.27, type: 'sine', volume: 60}, // Mercury - Speech Control, Study Aid, Confidence
+                    {freq: 221.23, type: 'sine', volume: 65}, // Venus - Beauty, Love, Sexuality, Sensuality, Harmony
+                    {freq: 7.83, type: 'sine', volume: 70},   // Earth - Memory, Rejuvenation, Balance, Tolerance, Grounding
+                    {freq: 144.72, type: 'sine', volume: 60}, // Mars - Energy, Humor, Strength, Focus of Will
+                    {freq: 183.58, type: 'sine', volume: 65}, // Jupiter - Success, Growth, Creative, Power, Generosity
+                    {freq: 147.85, type: 'sine', volume: 55}, // Saturn - Enhances Concentration, Karmic Connections, Structure and Order
+                    {freq: 207.36, type: 'sine', volume: 55}, // Uranus - Universal Harmony, Calmness, Good Moods
+                    {freq: 211.44, type: 'sine', volume: 50}  // Neptune - Lucid Dreams, Reveals Unconscious Thoughts
+                ]
+            };
+            
+            const preset = presets[presetName];
+            if (preset) {
+                preset.forEach((wave, index) => {
+                    const waveNum = index + 1;
+                    document.getElementById(`wave${waveNum}Freq`).value = wave.freq;
+                    document.getElementById(`wave${waveNum}Type`).value = wave.type;
+                    document.getElementById(`wave${waveNum}Volume`).value = wave.volume;
+                    document.getElementById(`wave${waveNum}Enable`).checked = true;
+                });
+                
+                // Update spectrum display after loading preset
+                updateSpectrum();
+            }
         }
 
         // Event listeners
@@ -569,21 +1182,61 @@
             mouseY = e.clientY;
         });
 
-        document.getElementById('colorInput').addEventListener('change', createParticles);
-        document.getElementById('shapeInput').addEventListener('change', createParticles);
+        // Wave synthesizer controls
+        document.getElementById('playAll').addEventListener('click', () => synth.playAll());
+        document.getElementById('stopAll').addEventListener('click', () => synth.stopAll());
 
-        document.getElementById('frequencySlider').addEventListener('input', (e) => {
-            document.getElementById('frequencyDisplay').textContent = e.target.value + ' Hz';
-            if (isPlaying && oscillator) {
-                oscillator.frequency.setValueAtTime(e.target.value, audioContext.currentTime);
-            }
+        document.getElementById('masterVolume').addEventListener('input', (e) => {
+            const volume = e.target.value / 100;
+            synth.setMasterVolume(volume);
+            e.target.nextElementSibling.textContent = e.target.value + '%';
         });
+
+        // Individual wave controls
+        for (let i = 1; i <= 8; i++) {
+            document.getElementById(`wave${i}Enable`).addEventListener('change', (e) => {
+                if (e.target.checked && synth.isPlaying) {
+                    synth.startWave(i);
+                } else {
+                    synth.stopWave(i);
+                }
+                updateSpectrum();
+            });
+
+            document.getElementById(`wave${i}Freq`).addEventListener('input', (e) => {
+                if (document.getElementById(`wave${i}Enable`).checked && synth.isPlaying) {
+                    synth.updateWave(i);
+                }
+                updateSpectrum();
+            });
+
+            document.getElementById(`wave${i}Type`).addEventListener('change', (e) => {
+                if (document.getElementById(`wave${i}Enable`).checked && synth.isPlaying) {
+                    synth.stopWave(i);
+                    synth.startWave(i);
+                }
+                updateSpectrum();
+            });
+
+            document.getElementById(`wave${i}Volume`).addEventListener('input', (e) => {
+                if (document.getElementById(`wave${i}Enable`).checked && synth.isPlaying) {
+                    synth.updateWave(i);
+                }
+                updateSpectrum();
+            });
+        }
+
+        document.getElementById('colorInput1').addEventListener('change', createParticles);
+        document.getElementById('colorInput2').addEventListener('change', createParticles);
+        document.getElementById('colorInput3').addEventListener('change', createParticles);
+        document.getElementById('shapeInput').addEventListener('change', createParticles);
 
         window.addEventListener('resize', resizeCanvas);
 
         // Initialize
         resizeCanvas();
         createParticles();
+        updateSpectrum(); // Initialize spectrum display
         animate();
     </script>
 </body>
